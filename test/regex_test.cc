@@ -136,7 +136,14 @@ TEST(Parser, Operator)
     const auto checkRes = [&] (regex::ParseResult::MaskType maskType)
     {
         ASSERT_EQ(result.maskType, maskType);
-        ASSERT_EQ(result.stringToBeFound, stringToBeFound);
+        if (maskType != regex::ParseResult::MaskType::Error)
+        {
+            ASSERT_EQ(result.stringToBeFound, stringToBeFound);
+        }
+        else
+        {
+            ASSERT_EQ(result.stringToBeFound, "");
+        }
     };
     checkRes(regex::ParseResult::MaskType::AsteriskLeft);
     result = regex::ParseMask("**Some");
@@ -157,10 +164,11 @@ TEST(Parser, Operator)
     checkRes(regex::ParseResult::MaskType::QuestionRight);
     result = regex::ParseMask("?Some?");
     checkRes(regex::ParseResult::MaskType::QuestionBothSide);
-    result = regex::ParseMask("?Some?");
-    checkRes(regex::ParseResult::MaskType::QuestionBothSide);
-
     result = regex::ParseMask("So*me");
+    checkRes(regex::ParseResult::MaskType::Error);
+    result = regex::ParseMask("***");
+    checkRes(regex::ParseResult::MaskType::Error);
+    result = regex::ParseMask("?");
     checkRes(regex::ParseResult::MaskType::Error);
 }
 
