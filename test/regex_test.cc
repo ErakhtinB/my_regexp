@@ -65,8 +65,7 @@ TEST_F (RegexFixture, EndRandomVariableLength)
     {
         "abc",
         "abcd",
-        "abcde",
-        "dabc abc"
+        "abcde"
     };
     rejectedStrings =
     {

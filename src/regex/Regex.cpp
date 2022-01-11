@@ -1,15 +1,103 @@
 #include "Regex.h"
+#include <ostream>
 #include <string>
 
 namespace regex {
 
 static ParseResult ParseForAsteriks(const std::string& mask, std::size_t asteriks);
 static ParseResult ParseForQuest(const std::string& mask, std::size_t quest);
+static void Print(std::ostream& os, std::size_t lineNumber, const std::string searchResult);
 
 void Match(std::shared_ptr<line_provider::ILineProvider> lineProvider,
     const std::string& mask, std::ostream& os)
 {
-    throw std::runtime_error("Not implemented");
+    const auto parseResult = ParseMask(mask);
+    const auto& mT = parseResult.maskType;
+    if (mT == ParseResult::MaskType::Error)
+    {
+        return;
+    }
+    std::size_t lineNumber = 0;
+    while (1)
+    {
+        auto line = lineProvider->GetNextLine();
+        if (!line.has_value())
+        {
+            return;
+        }
+        ++lineNumber;
+        std::size_t index = 0;
+        auto printNeeded = false;
+        while (1)
+        {
+            index = line->find(parseResult.stringToBeFound, index);
+            if (index == std::string::npos)
+            {
+                break;
+            }
+            // look strict
+            if (mT == ParseResult::MaskType::Strict)
+            {
+                if (mask.size() == line->size())
+                {
+                    printNeeded = true;
+                    break;
+                }
+            }
+            else if (mT == ParseResult::MaskType::QuestionLeft)
+            {
+                if (index == 1)
+                {
+                    printNeeded = true;
+                }
+                break;
+            }
+            else if (mT == ParseResult::MaskType::QuestionRight)
+            {
+                if (index + parseResult.stringToBeFound.size()
+                    == line->size() - 1)
+                {
+                    printNeeded = true;
+                }
+                break;
+            }
+            else if (mT == ParseResult::MaskType::QuestionBothSide)
+            {
+                if (index == 1
+                    || index + parseResult.stringToBeFound.size() == line->size() - 1)
+                {
+                    printNeeded = true;
+                }
+                break;
+            }
+            else if (mT == ParseResult::MaskType::AsteriskLeft)
+            {
+                if (index + parseResult.stringToBeFound.size() == line->size())
+                {
+                    printNeeded = true;
+                    break;
+                }
+            }
+            else if (mT == ParseResult::MaskType::AsteriskRight)
+            {
+                if (index == 0)
+                {
+                    printNeeded = true;
+                }
+                break;
+            }
+            else if (mT == ParseResult::MaskType::AsteriskBothSide)
+            {
+                printNeeded = true;
+                break;
+            }
+            ++index;
+        }
+        if (printNeeded)
+        {
+            Print(os, lineNumber, *line);
+        }
+    }
 }
 
 ParseResult ParseMask(const std::string &mask)
@@ -109,6 +197,11 @@ ParseResult ParseForQuest(const std::string& mask, std::size_t quest)
         }
         return {ParseResult::MaskType::QuestionRight, mask.substr(0, quest)};
     }
+}
+
+static void Print(std::ostream& os, std::size_t lineNumber, const std::string searchResult)
+{
+    os << std::to_string(lineNumber) << ":" << searchResult << std::endl;
 }
 
 } // namespace regex
