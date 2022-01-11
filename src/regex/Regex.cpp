@@ -35,7 +35,6 @@ void Match(std::shared_ptr<line_provider::ILineProvider> lineProvider,
             {
                 break;
             }
-            // look strict
             if (mT == ParseResult::MaskType::Strict)
             {
                 if (mask.size() == line->size())
