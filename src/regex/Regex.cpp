@@ -8,4 +8,9 @@ void Match(std::shared_ptr<line_provider::ILineProvider> lineProvider,
     throw std::runtime_error("Not implemented");
 }
 
+ParseResult ParseMask(const std::string &mask)
+{
+    throw std::runtime_error("Not implemented");
+}
+
 } // namespace regex
