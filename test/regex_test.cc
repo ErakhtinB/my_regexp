@@ -129,6 +129,41 @@ TEST_F (RegexFixture, BeginEndOneLength)
     CheckAllStringsFound("?abc?");
 }
 
+TEST(Parser, Operator)
+{
+    const std::string stringToBeFound = "Some";
+    auto result = regex::ParseMask("*Some");
+    const auto checkRes = [&] (regex::ParseResult::MaskType maskType)
+    {
+        ASSERT_EQ(result.maskType, maskType);
+        ASSERT_EQ(result.stringToBeFound, stringToBeFound);
+    };
+    checkRes(regex::ParseResult::MaskType::AsteriskLeft);
+    result = regex::ParseMask("**Some");
+    checkRes(regex::ParseResult::MaskType::AsteriskLeft);
+    result = regex::ParseMask("Some*");
+    checkRes(regex::ParseResult::MaskType::AsteriskRight);
+    result = regex::ParseMask("Some**");
+    checkRes(regex::ParseResult::MaskType::AsteriskRight);
+    result = regex::ParseMask("*Some*");
+    checkRes(regex::ParseResult::MaskType::AsteriskBothSide);
+    result = regex::ParseMask("**Some**");
+    checkRes(regex::ParseResult::MaskType::AsteriskBothSide);
+    result = regex::ParseMask("Some");
+    checkRes(regex::ParseResult::MaskType::Strict);
+    result = regex::ParseMask("?Some");
+    checkRes(regex::ParseResult::MaskType::QuestionLeft);
+    result = regex::ParseMask("Some?");
+    checkRes(regex::ParseResult::MaskType::QuestionRight);
+    result = regex::ParseMask("?Some?");
+    checkRes(regex::ParseResult::MaskType::QuestionBothSide);
+    result = regex::ParseMask("?Some?");
+    checkRes(regex::ParseResult::MaskType::QuestionBothSide);
+
+    result = regex::ParseMask("So*me");
+    checkRes(regex::ParseResult::MaskType::Error);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

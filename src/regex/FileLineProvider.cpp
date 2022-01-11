@@ -3,7 +3,7 @@
 
 namespace regex {
 
-FileLineProvider::FileLineProvider(const char* const filePath)
+FileLineProvider::FileLineProvider(const char* filePath)
     : m_filePath(filePath ? filePath : throw std::invalid_argument("File path empty")) {}
 
 std::optional<std::string> FileLineProvider::GetNextLine()
