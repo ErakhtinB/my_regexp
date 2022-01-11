@@ -1,14 +1,18 @@
 enable_testing()
 
+include(GoogleTest)
+
 add_executable(
   regex_test
   regex_test.cc
 )
 
 target_link_libraries(
-  regex PUBLIC
+  regex_test
+  regex
+  gtest
   gtest_main
+  pthread
 )
 
-include(GoogleTest)
 gtest_discover_tests(regex_test)
